@@ -4,8 +4,8 @@ import { Border, Blockquote, BlockLink } from 'rebass'
 
 ### Markdown for the component era
 
-MDX is an authorable format that lets you seamlessly use JSX in your Markdown
-documents.  You can import components, like interactive charts or notifs, and
+MDX is an authorable format that lets you seamlessly use [JSX][] in your Markdown
+documents.  You can import components, like interactive charts or alerts, and
 embed them within your content.  This makes writing long-form content with
 components a blast :rocket:.
 
@@ -22,14 +22,14 @@ the background color!**
 </div>
 ```
 
-:heart: **Powerful**: MDX blends markdown and JSX syntax to fit perfectly in
+:heart: **Powerful**: MDX blends Markdown and JSX syntax to fit perfectly in
 JSX-based projects.
 
 :computer: **Everything is a component**: Use existing components inside your
 MDX and import other MDX files as plain components.
 
-:wrench: **Customizable**: Decide which component is rendered for each markdown
-element.
+:wrench: **Customizable**: Specify which component you’d like to render for
+each Markdown element
 
 :books: **Markdown-based**: The simplicity and elegance of Markdown remains,
 you interleave JSX only when you want to.
@@ -45,14 +45,16 @@ during the build stage.
 ## Why?
 
 Before MDX, some of the benefits of writing Markdown were lost when integrating
-with JSX.  Implementations were often template string-based which required lots
-of escaping and cumbersome syntax.
+with JSX.  Implementations were often template string-based which required escaping
+and cumbersome syntax.
 
 MDX seeks to make writing with Markdown _and_ JSX simpler while being more
 expressive.  The possibilities are endless when you combine components (that can
 even be dynamic or load data) with the simplicity of Markdown for long-form content.
 
-> [Watch some of these features in action][intro]
+> [Watch a video that shows some of these features in action][intro]
+
+[jsx]: https://reactjs.org/docs/introducing-jsx.html
 
 [quote]: https://twitter.com/chrisbiscardi/status/1022304288326864896
 

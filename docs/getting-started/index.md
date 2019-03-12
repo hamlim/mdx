@@ -44,7 +44,6 @@ the installation guides.
 
 ## Table of contents
 
-*   [Scaffold out an app](#scaffold-out-an-app)
 *   [Syntax](#syntax)
     *   [Markdown](#markdown)
     *   [JSX](#jsx)
@@ -53,30 +52,17 @@ the installation guides.
     *   [MDXProvider](#mdxprovider)
     *   [Table of components](#table-of-components)
 *   [Installation guides](#installation-guides)
-
-## Scaffold out an app
-
-If you’re the type of person that wants to scaffold out an app quickly and start
-playing around you can use `npm init`:
-
-*   `npm init mdx` [`webpack`](./webpack)
-*   `npm init mdx` [`parcel`](./parcel)
-*   `npm init mdx` [`next`](./next)
-*   `npm init mdx` [`create-react-app`](./create-react-app)
-*   `npm init mdx` [`gatsby`](./gatsby)
-*   `npm init mdx` [`x0`](./x0)
-*   `npm init mdx` [`react-static`](./react-static)
+*   [Scaffold out an app](#scaffold-out-an-app)
 
 ## Syntax
 
-MDX syntax can be boiled down to being JSX in Markdown.
-It’s a superset of Markdown syntax that also supports importing, exporting, and
-JSX.
+MDX syntax can be boiled down to being JSX in Markdown.  It’s a superset of
+Markdown syntax that also supports importing, exporting, and JSX.
 
 ### Markdown
 
-Standard [Markdown syntax][md] is supported.
-It’s recommended to learn about Markdown in their [docs][md].
+Standard [Markdown syntax][md] is supported.  It’s recommended to learn about
+Markdown in their [docs][md].
 
 ### JSX
 
@@ -87,7 +73,7 @@ with the `<` character.
 # Below is a JSX block
 
 <div style={{ padding: '10px 30px', backgroundColor: 'tomato' }}>
-  <h2>Try editing the code below</h2>
+  <h2>Try making the h2 have the color green</h2>
 </div>
 ```
 
@@ -110,13 +96,15 @@ It is using imported components!
 
 You can also import data that you want to display in a JSX block:
 
-```jsx
-import { colors } from './theme'
-import Palette from './components/palette'
+```mdx
+import snowfallData from './snowfall.json'
+import BarChart from './charts/BarChart'
 
-# Colors
+# Recent snowfall trends
 
-<Palette colors={colors} />
+2019 has been a particularly snowy year when compared to the last decade
+
+<BarChart data={snowfallData} />
 ```
 
 ##### Embedding documents
@@ -140,17 +128,18 @@ import Contributing from './docs/contributing.md'
 
 ### Exports
 
-You can use exports to export metadata like layout or authors.
-It’s a mechanism for an imported MDX file to communicate with its parent.
-It works similarly to frontmatter, but uses ES2015 syntax.
+You can use exports to export metadata like layout or authors.  It’s a mechanism for
+an imported MDX file to communicate with its parent.  It works similarly to frontmatter,
+but uses ES2015 syntax.
 
 ```js
 // posts/post.mdx
 import { fred, sue } from '../data/authors'
 import Layout from '../components/blog-layout'
 
-export const meta = {
+export const metadata = {
   authors: [fred, sue],
+  title: 'My awesome article',
   layout: Layout
 }
 
@@ -159,81 +148,74 @@ export const meta = {
 MDX is a JSX in Markdown loader, parser, and renderer for ambitious projects.
 ```
 
+Those exports can then be imported by another file:
+
 ```jsx
 // index.js
 import React from 'react'
-import Mdx, { meta } from 'posts/post.mdx'
-
-const { authors, layout } = meta
+import MDXDocument, { metadata } from 'posts/post.mdx'
 
 export default () => (
-  <layout>
-    <Mdx />
-    By: {authors.map(author => author.name)}
-  </layout>
+  <>
+    <h3>{metadata.title}</h3>
+    By: {metadata.authors.map(author => author.name).join(', ')}
+
+    <MDXDocument />
+  </>
 )
 ```
 
-#### `export default`
-
-The ES default [export][] is used to provide a layout component which will wrap
-the transpiled JSX.
-
-You can export it as a function:
-
-```jsx
-import Layout from './Layout'
-
-export default ({ children }) => <Layout some='metadata' >{children}</Layout>
-
-# Hello, world!
-```
-
-Or directly as a component:
-
-```jsx
-import Layout from './Layout'
-
-export default Layout
-
-# Hello, world!
-```
+[Learn more about exports](/advanced/exports)
 
 ## Working with components
 
-In additon to rendering components inline, you can also pass in components
-for any HTML element that Markdown compiles to.  This allows you to use your
-existing components and even CSS-in-JS like `styled-components`.
+MDX documents can be passed the components that they should render for
+a given Markdown element.  The component mapping is based on the HTML
+element that Markdown renders.  So, for `# I'm a heading` you would
+specify `h1` because that’s the HTML element that it renders to.
 
-The components object is a mapping between the HTML element and your desired
-component you’d like to render.
+Here’s a full example:
+
+```jsx
+// src/App.js
+import React from 'react'
+
+// Import the MDX document
+import Hello from '../hello.mdx'
+
+// Create a few components with styling
+const MyH1 = props => <h1 style={{ color: 'tomato' }} {...props} />
+const MyParagraph = props => <p style={{ fontSize: '18px', lineHeight: 1.6 }} />
+const InlineCode = props => <code style={{ backgroundColor: 'silver' }} {...props} />
+
+// Create your component mapping for Markdown elements
+const components = {
+  h1: MyH1,
+  p: MyParagraph,
+  inlineCode: Code
+}
+
+export default () => <Hello components={components} />
+```
+
+In `hello.mdx`:
+
+```md
+# This will be rendered with Heading
+
+This will be rendered with Text, and `this rendered with inlineCode`
+```
+
+You can also import your components from another location like your UI library:
 
 ```jsx
 // src/App.js
 import React from 'react'
 import Hello from '../hello.mdx'
 
-const MyH1 = props => <h1 style={{ color: 'tomato' }} {...props} />
-const MyParagraph = props => <p style={{ fontSize: '18px', lineHeight: 1.6 }} />
-
-const components = {
-  h1: MyH1,
-  p: MyParagraph
-}
-
-export default () => <Hello components={components} />
-```
-
-You can also import your components from another location like your UI library:
-
-```jsx
-import React from 'react'
-import Hello from '../hello.mdx'
-
 import {
   Text,
   Heading,
-  Code,
   InlineCode
 } from '../ui-library'
 
@@ -242,47 +224,48 @@ export default () =>
     components={{
       h1: Heading,
       p: Text,
-      code: Code,
       inlineCode: InlineCode
     }}
   />
 ```
 
-With the above, the `Heading` component will be rendered for any `h1`, `Text`
-for `p` elements, and so on.
-
-In addition to HTML elements, there’s an `inlineCode`.
-This is what remark uses for code elements within paragraphs, tables, etc.
-
 ### MDXProvider
 
 If you’re using an app layout that wraps your application, you can use
-the `MDXProvider` to only pass your components in one place:
+the `MDXProvider` to pass your components in one place:
 
 ```jsx
 // src/App.js
 import React from 'react'
 import { MDXProvider } from '@mdx-js/tag'
 
-import { Heading, Text, Pre, Code, Table } from './components'
+// Import components from your component library
+import { Heading, Text, Code, Table } from './components'
+
+// Import MDX documents from your project
+import Doc1 from './content/doc-1.mdx'
+import Doc2 from './content/doc-2.mdx'
+import Doc3 from './content/doc-3.mdx'
 
 const components = {
   h1: Heading.H1,
   h2: Heading.H2,
-  // ...
   p: Text,
   code: Pre,
+  table: Table,
   inlineCode: Code
 }
 
 export default props =>
   <MDXProvider components={components}>
-    <main {...props} />
+    <Doc1 />
+    <Doc2 />
+    <Doc3 />
   </MDXProvider>
 ```
 
-This allows you to remove duplicated component imports and passing.
-It will typically go in layout files.
+All three MDX files will be rendered with the same components without
+having to pass the components manually to each document.
 
 ### Table of components
 
@@ -319,17 +302,29 @@ Markdown, so these can be keys in the component object you pass to MDXProvider.
 
 ## Installation guides
 
-Now that we’ve gone over how MDX works, you’re ready to get installing.
+Now that we’ve gone over how MDX works, you’re ready to get integrate it with
+your project.  Choose the framework or tool that you’re using:
 
 <InstallationGuides />
+
+## Scaffold out an app
+
+If you’re the type of person that wants to scaffold out an app quickly and start
+playing around you can use `npm init`.  You can choose any of the commands below
+to scaffold out a project to play around with:
+
+*   `npm init mdx` [`parcel`](./parcel)
+*   `npm init mdx` [`next`](./next)
+*   `npm init mdx` [`create-react-app`](./create-react-app)
+*   `npm init mdx` [`gatsby`](./gatsby)
+*   `npm init mdx` [`x0`](./x0)
+*   `npm init mdx` [`react-static`](./react-static)
 
 [md]: https://daringfireball.net/projects/markdown/syntax
 
 [jsx]: https://reactjs.org/docs/introducing-jsx.html
 
 [import]: https://developer.mozilla.org/en-US/docs/web/javascript/reference/statements/import
-
-[export]: https://developer.mozilla.org/en-US/docs/web/javascript/reference/statements/export
 
 [transclude]: https://en.wikipedia.org/wiki/Transclusion
 
